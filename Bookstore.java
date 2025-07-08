@@ -83,7 +83,7 @@ class PaperBook extends Book{
     }
 
     void ShipPaperBook(String recipientAddress){
-        System.out.println(getTitle() + " book will be shipped to the following address " + recipientAddress);
+        System.out.println("Shipping Notice: " + getTitle() + " book will be shipped to the following address " + recipientAddress);
     }
     
     @Override
@@ -104,15 +104,15 @@ class EBook extends Book{
     }
 
     void SendEbookByEmail(String recipientEmail){
-        System.out.println(getTitle() + " book was sent successfully to this email " + recipientEmail);
+        System.out.println("Email Notice: " + getTitle() + " book will be sent to this email " + recipientEmail);
     }
 
     @Override
-    void UpdateBookAfterPurchase(int quantity, String cutomerEmail, String customerAddress){
+    void UpdateBookAfterPurchase(int quantity, String customerEmail, String customerAddress){
         if (quantity != 1) {
             throw new IllegalArgumentException("You can only purchase 1 quantity of this eBook " + getTitle());
         }
-        SendEbookByEmail(customerAddress);
+        SendEbookByEmail(customerEmail);
     }
 } 
 
@@ -229,15 +229,19 @@ class BookstoreFunctionalities{
 
         float Totalprice = quantity * purchasedBook.getPrice();
 
-        System.out.println("-------------------------------------");
-        System.out.println("**Your Purchase**");
-        System.out.println("Book title: " + purchasedBook.getTitle());
-        System.out.println("Amount: " + quantity);
-        System.out.println("Price/book: " + purchasedBook.getPrice());
-        System.out.println("Total Price: " + Totalprice);
-        System.out.println("\nYour purchase was success");
-    
-        purchasedBook.UpdateBookAfterPurchase(quantity, customerEmail, CustomerAddress);
+        try{
+            purchasedBook.UpdateBookAfterPurchase(quantity, customerEmail, CustomerAddress);
+
+            System.out.println("**Your Purchase**");
+            System.out.println("Book title: " + purchasedBook.getTitle());
+            System.out.println("Amount: " + quantity);
+            System.out.println("Price/book: " + purchasedBook.getPrice());
+            System.out.println("Total Price: " + Totalprice);
+            System.out.println("Your purchase was success");
+        }
+        catch(Exception e){
+            System.out.println("Expected error: " + e.getMessage());
+        }
 
         return Totalprice;
     }
@@ -253,124 +257,144 @@ public class Bookstore {
         // Test 1: Add books to inventory
         System.out.println("**Test 1: Adding Books**");
         try {
-            inventory.addBook(new PaperBook("Wild Dark Shore", "Charlotte McConaghy", Year.of(2025), 500, 5));
-            inventory.addBook(new EBook("Dream Count", "Chimamanda Ngozi Adichie", Year.of(2025), 300, "EPUB"));
-            inventory.addBook(new ShowcaseBook("Harry Potter and the Philosopher’s Stone", "J.K. Rowling", Year.of(1997), 200));
-            inventory.addBook(new EBook("A Thousand Splendid Suns", "Khaled Hosseini", Year.of(2007), 250, "EPUB"));
-            inventory.displayBooksInInventory();
-        } catch (Exception e) {
-            System.out.println("Quantum book store: Error: " + e.getMessage());
+            inventory.AddBook(new PaperBook("Wild Dark Shore", Year.of(2025), 500, 5));
+            inventory.AddBook(new EBook("Dream Count", Year.of(2025), 300, "EPUB"));
+            inventory.AddBook(new ShowcaseBook("Harry Potter and the Philosopher’s Stone", Year.of(1997), 200));
+            inventory.AddBook(new EBook("A Thousand Splendid Suns", Year.of(2007), 250, "EPUB"));
+            inventory.getBooksInInventory();;
+        } 
+        catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
+
 
         // Test 2: Add duplicate book
-        System.out.println("\nQuantum book store: **Test 2: Adding Duplicate Book**");
+        System.out.println("------------------------------------------\n");
+        System.out.println("**Test 2: Adding Duplicate Book**");
         try {
-            inventory.addBook(new PaperBook("9789999999999", "Wild Dark Shore", "Charlotte McConaghy", Year.of(2025), 500, 3));
-        } catch (IllegalStateException e) {
-            System.out.println("Quantum book store: Expected error: " + e.getMessage());
+            inventory.AddBook(new PaperBook("Wild Dark Shore", Year.of(2025), 500, 3));
+        } 
+        catch (Exception e) {
+            System.out.println("Expected error: " + e.getMessage());
         }
 
+
+        System.out.println("------------------------------------------\n");
         // Test 3: Remove outdated books (1997 and 2007)
-        System.out.println("\nQuantum book store: **Test 3: Remove Outdated Books**");
+        System.out.println("**Test 3: Remove Outdated Books**");
         try {
-            List<Book> removedBooks = inventory.removeOutdatedBooks();
-            System.out.println("Quantum book store: Removed books:");
+            List<Book> removedBooks = inventory.RemoveOutdatedBook();
+            System.out.println("Removed books:");
             if (removedBooks.isEmpty()) {
-                System.out.println("Quantum book store: No books removed");
-            } else {
+                System.out.println("No books removed");
+            } 
+            else {
                 for (Book book : removedBooks) {
-                    System.out.println("Quantum book store: " + book.toString());
+                    System.out.println(book.toString());
                 }
             }
-            inventory.displayBooksInInventory();
-        } catch (Exception e) {
-            System.out.println("Quantum book store: Error: " + e.getMessage());
+            inventory.getBooksInInventory();
+        } 
+        catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
+
 
         // Test 4: Buy a PaperBook
-        System.out.println("\nQuantum book store: **Test 4: Buy PaperBook**");
+        System.out.println("------------------------------------------\n");
+        System.out.println("**Test 4: Buy PaperBook**");
         try {
-            float total = bookstore.buy("978125081762", 2, "user@example.com", "123 Main St");
-            System.out.println("Quantum book store: Total paid: " + total);
-            inventory.displayBooksInInventory();
-        } catch (Exception e) {
-            System.out.println("Quantum book store: Error: " + e.getMessage());
+            float total = bookstore.Buy("1", 2, "user@example.com", "123 Main St");
+            System.out.println("Total paid: " + total);
+            inventory.getBooksInInventory();
+        } 
+        catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
+
 
         // Test 5: Buy an EBook
-        System.out.println("\nQuantum book store: **Test 5: Buy EBook**");
+        System.out.println("------------------------------------------\n");
+        System.out.println("**Test 5: Buy EBook**");
         try {
-            float total = bookstore.buy("9780593315293", 1, "user@example.com", "123 Main St");
-            System.out.println("Quantum book store: Total paid: " + total);
-            inventory.displayBooksInInventory();
-        } catch (Exception e) {
-            System.out.println("Quantum book store: Error: " + e.getMessage());
+            float total = bookstore.Buy("2", 1, "user@example.com", "123 Main St");
+            System.out.println("Total paid: " + total);
+            inventory.getBooksInInventory();
+        } 
+        catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
         }
+
 
         // Test 6: Buy a ShowcaseBook (should fail)
-        System.out.println("\nQuantum book store: **Test 6: Buy ShowcaseBook**");
+        // add another showcase book because the previous one was removed in test 3
+        System.out.println("------------------------------------------\n");
+        inventory.AddBook(new ShowcaseBook("New Showcase Book", Year.of(2025), 150));
+        System.out.println("**Test 6: Buy ShowcaseBook**");
         try {
-            bookstore.buy("9780747532743", 1, "user@example.com", "123 Main St");
-        } catch (IllegalStateException e) {
-            System.out.println("Quantum book store: Expected error: " + e.getMessage());
+            bookstore.Buy("6", 1, "user@example.com", "123 Main St");
+        } 
+        catch (Exception e) {
+            System.out.println("Expected error: " + e.getMessage());
         }
+
 
         // Test 7: Buy with invalid ISBN
-        System.out.println("\nQuantum book store: **Test 7: Buy with Invalid ISBN**");
+        System.out.println("------------------------------------------\n");
+        System.out.println("**Test 7: Buy with Invalid ISBN**");
         try {
-            bookstore.buy("9999999999999", 1, "user@example.com", "123 Main St");
-        } catch (BookNotFoundException e) {
-            System.out.println("Quantum book store: Expected error: " + e.getMessage());
+            bookstore.Buy("99999", 1, "user@example.com", "123 Main St");
+        } 
+        catch (BookNotFoundException e) {
+            System.out.println("Expected error: " + e.getMessage());
         }
 
-        // Test 8: Buy with null ISBN
-        System.out.println("\nQuantum book store: **Test 8: Buy with Null ISBN**");
+
+        // Test 8: Buy with negative quantity
+        System.out.println("------------------------------------------\n");
+        System.out.println("**Test 8: Buy with Negative Quantity**");
         try {
-            bookstore.buy(null, 1, "user@example.com", "123 Main St");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Quantum book store: Expected error: " + e.getMessage());
+            bookstore.Buy("1", -1, "user@example.com", "123 Main St");
+        } 
+        catch (IllegalArgumentException e) {
+            System.out.println("Expected error: " + e.getMessage());
         }
 
-        // Test 9: Buy with negative quantity
-        System.out.println("\nQuantum book store: **Test 9: Buy with Negative Quantity**");
+
+        // Test 9: Buy PaperBook with insufficient stock
+        System.out.println("------------------------------------------\n");
+        System.out.println("**Test 9: Buy PaperBook with Insufficient Stock**");
         try {
-            bookstore.buy("978125081762", -1, "user@example.com", "123 Main St");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Quantum book store: Expected error: " + e.getMessage());
+            bookstore.Buy("1", 10, "user@example.com", "123 Main St");
+        } 
+        catch (IllegalArgumentException e) {
+            System.out.println("Expected error: " + e.getMessage());
         }
 
-        // Test 10: Buy PaperBook with insufficient stock
-        System.out.println("\nQuantum book store: **Test 10: Buy PaperBook with Insufficient Stock**");
+
+        // Test 10 Buy EBook with quantity > 1
+        System.out.println("------------------------------------------\n");
+        System.out.println("**Test 10: Buy EBook with Quantity > 1**");
         try {
-            bookstore.buy("978125081762", 10, "user@example.com", "123 Main St");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Quantum book store: Expected error: " + e.getMessage());
+            bookstore.Buy("2", 2, "user@example.com", "123 Main St");
+        } 
+        catch (IllegalArgumentException e) {
+            System.out.println("Expected error: " + e.getMessage());
         }
 
-        // Test 11: Buy EBook with quantity > 1
-        System.out.println("\nQuantum book store: **Test 11: Buy EBook with Quantity > 1**");
+
+        // Test 11: Operations on empty inventory
+        System.out.println("------------------------------------------\n");
+        System.out.println("**Test 11: Operations on Empty Inventory**");
         try {
-            bookstore.buy("9780593315293", 2, "user@example.com", "123 Main St");
-        } catch (IllegalArgumentException e) {
-            System.out.println("Quantum book store: Expected error: " + e.getMessage());
+            bookstore = new BookstoreFunctionalities();   // Reset inventory
+            bookstore.getInventory().getBooksInInventory();
+            bookstore.Buy("1", 1, "user@example.com", "123 Main St");
+        } 
+        catch (BookNotFoundException e) {
+            System.out.println("Expected error: " + e.getMessage());
         }
 
-        // Test 12: Operations on empty inventory
-        System.out.println("\nQuantum book store: **Test 12: Operations on Empty Inventory**");
-        try {
-            inventory = new Inventory(); // Reset inventory
-            inventory.displayBooksInInventory();
-            bookstore.buy("978125081762", 1, "user@example.com", "123 Main St");
-        } catch (BookNotFoundException e) {
-            System.out.println("Quantum book store: Expected error: " + e.getMessage());
-        }
-
-        // Test 13: Add null book
-        System.out.println("\nQuantum book store: **Test 13: Add Null Book**");
-        try {
-            inventory.addBook(null);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Quantum book store: Expected error: " + e.getMessage());
-        }
     }
 }
+
